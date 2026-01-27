@@ -2,6 +2,8 @@
 
 How to run:
 
+docker compose up
+
 docker build -t taxi_ingest:v002 .
 
  docker run -it --rm   --network=pipeline_default   taxi_ingest:v002   --pg-user=root   --pg-pass=root   --pg-host=pgdatabase   --pg-port=5432   --pg-db=ny_taxi   --target-table=green_taxi_trips   --year=2025   --month=11
