@@ -160,8 +160,15 @@ What is the count of records in the fct_monthly_zone_revenue model?
 
 - 12,998
 - 14,120
-- 12,184
+- +++ 12,184
 - 15,421
+
+```
+-- 12184
+SELECT
+  COUNT(*)
+FROM {{ ref('fct_monthly_zone_revenue') }} AS mzr
+```
 
 
 Question 4. Best Performing Zone for Green Taxis (2020)
@@ -169,10 +176,23 @@ Using the fct_monthly_zone_revenue table, find the pickup zone with the highest 
 
 Which zone had the highest revenue?
 
-- East Harlem North
+- +++ East Harlem North
 - Morningside Heights
 - East Harlem South
 - Washington Heights South
+
+```
+-- East Harlem North
+SELECT 
+  mzr.pickup_zone,
+  SUM(mzr.revenue_monthly_total_amount) AS total_revenue
+FROM {{ ref('fct_monthly_zone_revenue') }} AS mzr
+WHERE mzr.service_type = 'Green'
+  AND mzr.revenue_month >= '2020-01-01'
+  AND mzr.revenue_month <= '2020-12-31'
+GROUP BY mzr.pickup_zone
+ORDER BY total_revenue DESC
+```
 
 
 Question 5. Green Taxi Trip Counts (October 2019)
@@ -180,8 +200,18 @@ Using the fct_monthly_zone_revenue table, what is the total number of trips (tot
 
 - 500,234
 - 350,891
-- 384,624
+- +++ 384,624
 - 421,509
+
+```
+-- 384624
+SELECT 
+  SUM(mzr.total_monthly_trips) AS total_revenue
+FROM {{ ref('fct_monthly_zone_revenue') }} AS mzr
+WHERE mzr.service_type = 'Green'
+  AND mzr.revenue_month >= '2019-10-01'
+  AND mzr.revenue_month <= '2019-10-31'
+```
 
 
 Question 6. Build a Staging Model for FHV Data
@@ -199,5 +229,8 @@ What is the count of records in stg_fhv_tripdata?
 - 44,112,187
 
 ```
-SELECT COUNT(*) FROM {{ ref("stg_fhv_tripdata") }}
+-- 43244693
+SELECT
+    COUNT(*) 
+FROM {{ ref("stg_fhv_tripdata") }}
 ```
