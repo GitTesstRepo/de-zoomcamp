@@ -29,6 +29,16 @@ After rendering this mask {{inputs.taxi}}_tripdata_{{inputs.year}}-{{inputs.mont
 - 29,430,127
 
 Comment:
+```
+SELECT
+  filename AS File,
+  COUNT(*) AS Records
+FROM `terra-77564.kestra_dataset.yellow_tripdata` 
+WHERE filename LIKE 'yellow_tripdata_2020%'
+GROUP BY filename
+ORDER BY filename;
+```
+
     Statistics per each file:
 ```
     File                         Records
@@ -60,6 +70,12 @@ FROM public.green_tripdata
 WHERE filename LIKE 'green_tripdata_2020%';
 ```
 
+```
+SELECT COUNT(*)
+FROM `terra-77564.kestra_dataset.green_tripdata` 
+WHERE filename LIKE "green_tripdata_2020%";
+```
+
 
 5 How many rows are there for the Yellow Taxi data for the March 2021 CSV file?
 - 1,428,092
@@ -71,6 +87,12 @@ Comment:
 ```
 SELECT COUNT(*)
 FROM public.yellow_tripdata
+WHERE filename = 'yellow_tripdata_2021-03.csv';
+```
+
+```
+SELECT COUNT(*)
+FROM `terra-77564.kestra_dataset.yellow_tripdata` 
 WHERE filename = 'yellow_tripdata_2021-03.csv';
 ```
 
