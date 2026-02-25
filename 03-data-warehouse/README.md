@@ -1,4 +1,5 @@
-## Module 3 Homework
+## Module 3 Homework: Data Warehousing & BigQuery
+https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2026/03-data-warehouse/homework.md
 
 Upload .parquet files:
 ```

@@ -1,4 +1,5 @@
-## Module 4 Homework
+## Module 4 Homework: Analytics Engineering with dbt
+https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2026/04-analytics-engineering/homework.md
 
 Upload .csv files:
 ```
