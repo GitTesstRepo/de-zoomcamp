@@ -30,6 +30,21 @@ materialization:
   # time_granularity: timestamp
 
 # TODO: Define report columns + primary key(s) at your chosen level of aggregation.
+# columns:
+  # - name: TODO_dim
+  #   type: TODO
+  #   description: TODO
+  #   primary_key: true
+  # - name: TODO_date
+  #   type: DATE
+  #   description: TODO
+  #   primary_key: true
+  # - name: TODO_metric
+  #   type: BIGINT
+  #   description: TODO
+  #   checks:
+  #     - name: non_negative
+
 @bruin */
 
 -- Purpose of reports:
@@ -38,7 +53,7 @@ materialization:
 -- - Filter using `{{ start_datetime }}` / `{{ end_datetime }}` for incremental runs
 -- - GROUP BY your dimension + date columns
 
-SELECT *
+SELECT * -- TODO: replace with your aggregation logic
 FROM staging.trips
 WHERE tpep_pickup_datetime >= '{{ start_datetime }}'
   AND tpep_pickup_datetime < '{{ end_datetime }}'
