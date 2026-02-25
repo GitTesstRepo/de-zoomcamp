@@ -54,7 +54,7 @@ materialization:
   # time_granularity: TODO_SET_GRANULARITY
 
 # TODO: Define output columns, mark primary keys, and add a few checks.
-# columns:
+columns:
   # - name: TODO_pk1
     # type: TODO
     # description: TODO
@@ -67,6 +67,64 @@ materialization:
     # description: TODO
     # checks:
       # - name: non_negative
+  - name: tpep_pickup_datetime
+    type: string
+    description: The date and time when the meter was engaged.
+  - name: tpep_dropoff_datetime
+    type: string
+    description: The date and time when the meter was disengaged.
+  - name: passenger_count
+    type: string
+    description: The number of passengers in the vehicle.
+  - name: trip_distance
+    type: string
+    description: The elapsed trip distance in miles reported by the taximeter.
+  - name: RatecodeID
+    type: string
+    description: The final rate code in effect at the end of the trip.
+  - name: store_and_fwd_flag
+    type: string
+    description: This flag indicates whether the trip record was held in vehicle memory before
+sending to the vendor, aka “store and forward,” because the vehicle did not
+have a connection to the server.
+  - name: PULocationID
+    type: string
+    description: TLC Taxi Zone in which the taximeter was engaged.
+  - name: DOLocationID
+    type: string
+    description: TLC Taxi Zone in which the taximeter was disengaged.
+  - name: payment_type
+    type: string
+    description: A numeric code signifying how the passenger paid for the trip.
+  - name: fare_amount
+    type: string
+    description: The time-and-distance fare calculated by the meter.
+  - name: extra
+    type: string
+    description: Miscellaneous extras and surcharges.
+  - name: mta_tax
+    type: string
+    description: Tax that is automatically triggered based on the metered rate in use.
+  - name: tip_amount
+    type: string
+    description: Tip amount - This field is automatically populated for credit card tips. Cash
+tips are not included.
+  - name: tolls_amount
+    type: string
+    description: Total amount of all tolls paid in trip.
+  - name: improvement_surcharge
+    type: string
+    description: Improvement surcharge assessed trips at the flag drop. The improvement
+surcharge began being levied in 2015.
+  - name: total_amount
+    type: string
+    description: The total amount charged to passengers. Does not include cash tips.
+  - name: congestion_surcharge
+    type: string
+    description: Total amount collected in trip for NYS congestion surcharge.
+  - name: airport_fee
+    type: string
+    description: For pick up only at LaGuardia and John F. Kennedy Airports.
 
 # TODO: Add one custom check that validates a staging invariant (uniqueness, ranges, etc.)
 # Docs: https://getbruin.com/docs/bruin/quality/custom
