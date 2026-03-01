@@ -2,8 +2,10 @@
 # - Keep this intentionally minimal.
 # - Pin versions for reproducibility.
 # Docs: https://getbruin.com/docs/bruin/assets/python
+# pip show python-dateutil
 #
 # Example:
 pandas==2.2.0
 # requests==2.31.0
-
+datetime
+python-dateutil 
