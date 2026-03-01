@@ -1,6 +1,28 @@
 ## Module 5 Homework: Data Platforms with Bruin
 https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2026/05-data-platforms/homework.md
 
+```
+bruin run   --start-date 2022-02-01T00:00:00.000Z   --end-date 2022-02-28T23:59:59.999999999Z   --environment default   "/home/osboxes/Study/bruin/zoomcamp/pipeline/assets/ingestion/trips.py" --var 'taxi_types=["yellow", "green"]' --full-refresh
+
+cd /home/osboxes/Study/bruin/zoomcamp && bruin query --connection duckdb-default --query "select * from ingestion.trips limit 10;"
+```
+
+```
+bruin run   --start-date 2022-02-01T00:00:00.000Z   --end-date 2022-02-28T23:59:59.999999999Z   --environment default   "/home/osboxes/Study/bruin/zoomcamp/pipeline/assets/staging/trips.sql" --full-refresh
+
+cd /home/osboxes/Study/bruin/zoomcamp && bruin query --connection duckdb-default --query "select * from staging.trips limit 10;"
+```
+
+```
+bruin run   --start-date 2022-02-01T00:00:00.000Z   --end-date 2022-02-28T23:59:59.999999999Z   --environment default   "/home/osboxes/Study/bruin/zoomcamp/pipeline/assets/reports/trips_report.sql" --full-refresh
+
+cd /home/osboxes/Study/bruin/zoomcamp && bruin query --connection duckdb-default --query "select * from reports.trips_report limit 10;"
+```
+
+```
+bruin run   --start-date 2022-02-01   --end-date 2022-02-28T23:59:59.999999999Z   --full-refresh   --environment default   "/home/osboxes/Study/bruin/zoomcamp/pipeline/pipeline.yml"
+```
+
 ### Quiz Questions
 Question 1. Bruin Pipeline Structure
 In a Bruin project, what are the required files/directories?
