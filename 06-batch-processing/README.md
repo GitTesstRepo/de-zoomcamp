@@ -12,6 +12,11 @@ Codespace free space:
 df -h .
 ```
 
+For this homework we will be using the Yellow 2025-11 data from the official website:
+```
+wget https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2025-11.parquet
+```
+
 ### Quiz Questions
 Question 1: Install Spark and PySpark
 Install Spark
@@ -44,7 +49,7 @@ total 102M
 -rw-r--r-- 1 root root 26M Mar  9 10:49 part-00001-2000c836-1835-49d4-b090-98aa35afd34e-c000.snappy.parquet
 -rw-r--r-- 1 root root 26M Mar  9 10:49 part-00002-2000c836-1835-49d4-b090-98aa35afd34e-c000.snappy.parquet
 -rw-r--r-- 1 root root 26M Mar  9 10:49 part-00003-2000c836-1835-49d4-b090-98aa35afd34e-c000.snappy.parquet
-``
+```
 
 Question 3: Count records
 How many taxi trips were there on the 15th of November?
