@@ -2,6 +2,10 @@
 https://github.com/DataTalksClub/data-engineering-zoomcamp/blob/main/cohorts/2026/05-data-platforms/homework.md
 
 ```
+sqlfluff lint /workspaces/de-zoomcamp/05-data-platforms/nyc-taxi/pipeline/assets/staging/trips.sql -v
+```
+
+```
 bruin run   --start-date 2022-02-01T00:00:00.000Z   --end-date 2022-02-28T23:59:59.999999999Z   --environment default   "/home/osboxes/Study/bruin/zoomcamp/pipeline/assets/ingestion/trips.py" --var 'taxi_types=["yellow", "green"]' --full-refresh
 
 cd /home/osboxes/Study/bruin/zoomcamp && bruin query --connection duckdb-default --query "select * from ingestion.trips limit 10;"
