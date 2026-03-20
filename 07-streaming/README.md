@@ -8,6 +8,11 @@ docker compose up -d
 
 
 Question 1. Redpanda version
+Run rpk version inside the Redpanda container:
+```
+docker exec -it workshop-redpanda-1 rpk version
+```
+What version of Redpanda are you running?
 ```
 > docker compose ps
 
@@ -23,21 +28,12 @@ Redpanda Cluster
   node-1  v25.3.9 - 836b4a36ef6d5121edbb1e68f0f673c2a8a244e2
 ```
 
-Run rpk version inside the Redpanda container:
-```
-docker exec -it workshop-redpanda-1 rpk version
-```
-What version of Redpanda are you running?
-
 Question 2. Sending data to Redpanda
-
-```
-docker exec -it 07-stream-redpanda-1 rpk topic create green-trips
-```
-
 Create a topic called green-trips:
 
+```
 docker exec -it workshop-redpanda-1 rpk topic create green-trips
+```
 Now write a producer to send the green taxi data to this topic.
 
 Read the parquet file and keep only these columns:
@@ -72,9 +68,24 @@ How long did it take to send the data?
 - 120 seconds
 - 300 seconds
 
+```
+docker exec -it 07-stream-redpanda-1 rpk topic create green-trips
+```
+
 took 13.15 seconds
 
 Question 3. Consumer - trip distance
+Write a Kafka consumer that reads all messages from the green-trips topic (set auto_offset_reset='earliest').
+
+Count how many trips have a trip_distance greater than 5.0 kilometers.
+
+How many trips have trip_distance > 5?
+
+- 6506
+- 7506
+- 8506 +++
+- 9506
+
 ```
 uvx --with "psycopg[binary]" pgcli -h localhost -p 5432 -U postgres -d postgres
 
@@ -89,16 +100,6 @@ CREATE TABLE processed_green_trips (
     total_amount DOUBLE PRECISION
 );
 ```
-Write a Kafka consumer that reads all messages from the green-trips topic (set auto_offset_reset='earliest').
-
-Count how many trips have a trip_distance greater than 5.0 kilometers.
-
-How many trips have trip_distance > 5?
-
-- 6506
-- 7506
-- 8506 +++
-- 9506
 
 ```
 -- 49416
@@ -111,14 +112,9 @@ SELECT COUNT(*) FROM processed_green_trips WHERE trip_distance > 5;
 Part 2: PyFlink (Questions 4-6)
 For the PyFlink questions, you'll adapt the workshop code to work with the green taxi data. The key differences from the workshop:
 
-```
-docker exec -it 07-stream-redpanda-1 rpk topic delete green-trips
-docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/aggregation_green_job.py
-```
-
-Topic name: green-trips (instead of rides)
-Datetime columns use lpep_ prefix (instead of tpep_)
-You'll need to handle timestamps as strings (not epoch milliseconds)
+- Topic name: green-trips (instead of rides)
+- Datetime columns use lpep_ prefix (instead of tpep_)
+- You'll need to handle timestamps as strings (not epoch milliseconds)
 You can convert string timestamps to Flink timestamps in your source DDL:
 ```
 lpep_pickup_datetime VARCHAR,
@@ -129,11 +125,11 @@ Before running the Flink jobs, create the necessary PostgreSQL tables for your r
 
 Important notes for the Flink jobs:
 
-Place your job files in workshop/src/job/ - this directory is mounted into the Flink containers at /opt/src/job/
-Submit jobs with: docker exec -it workshop-jobmanager-1 flink run -py /opt/src/job/your_job.py
-The green-trips topic has 1 partition, so set parallelism to 1 in your Flink jobs (env.set_parallelism(1)). With higher parallelism, idle consumer subtasks prevent the watermark from advancing.
-Flink streaming jobs run continuously. Let the job run for a minute or two until results appear in PostgreSQL, then query the results. You can cancel the job from the Flink UI at http://localhost:8081
-If you sent data to the topic multiple times, delete and recreate the topic to avoid duplicates: docker exec -it workshop-redpanda-1 rpk topic delete green-trips
+- Place your job files in workshop/src/job/ - this directory is mounted into the Flink containers at /opt/src/job/
+- Submit jobs with: docker exec -it workshop-jobmanager-1 flink run -py /opt/src/job/your_job.py
+- The green-trips topic has 1 partition, so set parallelism to 1 in your Flink jobs (env.set_parallelism(1)). With higher parallelism, idle consumer subtasks prevent the watermark from advancing.
+- Flink streaming jobs run continuously. Let the job run for a minute or two until results appear in PostgreSQL, then query the results. You can cancel the job from the Flink UI at http://localhost:8081
+- If you sent data to the topic multiple times, delete and recreate the topic to avoid duplicates: docker exec -it workshop-redpanda-1 rpk topic delete green-trips
 
 Question 4. Tumbling window - pickup location
 Create a Flink job that reads from green-trips and uses a 5-minute tumbling window to count trips per PULocationID.
@@ -156,6 +152,11 @@ Which PULocationID had the most trips in a single 5-minute window?
 - 166
 
 ```
+docker exec -it 07-stream-redpanda-1 rpk topic delete green-trips
+docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/aggregation_green_job.py
+```
+
+```
 CREATE TABLE processed_green_events_aggregated (
     window_start TIMESTAMP,
     PULocationID INTEGER,
@@ -169,6 +170,8 @@ FROM processed_green_events_aggregated
 ORDER BY num_trips DESC
 LIMIT 3;
 ````
+Output:
+```
 +--------------+-----------+
 | pulocationid | num_trips |
 |--------------+-----------|
@@ -176,8 +179,7 @@ LIMIT 3;
 | 74           | 14        |
 | 74           | 13        |
 +--------------+-----------+
-
-
+```
 
 Question 5. Session window - longest streak
 Create another Flink job that uses a session window with a 5-minute gap on PULocationID, using lpep_pickup_datetime as the event time with a 5-second watermark tolerance.
