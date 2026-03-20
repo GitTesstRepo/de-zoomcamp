@@ -6,13 +6,17 @@ docker compose build
 docker compose up -d
 ```
 
-
+### Quiz Questions
 Question 1. Redpanda version
+
 Run rpk version inside the Redpanda container:
+
 ```
 docker exec -it workshop-redpanda-1 rpk version
 ```
+
 What version of Redpanda are you running?
+
 ```
 > docker compose ps
 
@@ -29,6 +33,7 @@ Redpanda Cluster
 ```
 
 Question 2. Sending data to Redpanda
+
 Create a topic called green-trips:
 
 ```
@@ -46,9 +51,11 @@ Read the parquet file and keep only these columns:
 - trip_distance
 - tip_amount
 - total_amount
+
 Convert each row to a dictionary and send it to the green-trips topic. You'll need to handle the datetime columns - convert them to strings before serializing to JSON.
 
 Measure the time it takes to send the entire dataset and flush:
+
 ```
 from time import time
 
@@ -61,6 +68,7 @@ producer.flush()
 t1 = time()
 print(f'took {(t1 - t0):.2f} seconds')
 ```
+
 How long did it take to send the data?
 
 - 10 seconds +++
@@ -75,6 +83,7 @@ docker exec -it 07-stream-redpanda-1 rpk topic create green-trips
 took 13.15 seconds
 
 Question 3. Consumer - trip distance
+
 Write a Kafka consumer that reads all messages from the green-trips topic (set auto_offset_reset='earliest').
 
 Count how many trips have a trip_distance greater than 5.0 kilometers.
@@ -110,17 +119,20 @@ SELECT COUNT(*) FROM processed_green_trips WHERE trip_distance > 5;
 ```
 
 Part 2: PyFlink (Questions 4-6)
+
 For the PyFlink questions, you'll adapt the workshop code to work with the green taxi data. The key differences from the workshop:
 
 - Topic name: green-trips (instead of rides)
 - Datetime columns use lpep_ prefix (instead of tpep_)
 - You'll need to handle timestamps as strings (not epoch milliseconds)
 You can convert string timestamps to Flink timestamps in your source DDL:
+
 ```
 lpep_pickup_datetime VARCHAR,
 event_timestamp AS TO_TIMESTAMP(lpep_pickup_datetime, 'yyyy-MM-dd HH:mm:ss'),
 WATERMARK FOR event_timestamp AS event_timestamp - INTERVAL '5' SECOND
 ```
+
 Before running the Flink jobs, create the necessary PostgreSQL tables for your results.
 
 Important notes for the Flink jobs:
@@ -132,11 +144,13 @@ Important notes for the Flink jobs:
 - If you sent data to the topic multiple times, delete and recreate the topic to avoid duplicates: docker exec -it workshop-redpanda-1 rpk topic delete green-trips
 
 Question 4. Tumbling window - pickup location
+
 Create a Flink job that reads from green-trips and uses a 5-minute tumbling window to count trips per PULocationID.
 
 Write the results to a PostgreSQL table with columns: window_start, PULocationID, num_trips.
 
 After the job processes all data, query the results:
+
 ```
 SELECT PULocationID, num_trips
 FROM <your_table>
@@ -155,7 +169,6 @@ Which PULocationID had the most trips in a single 5-minute window?
 docker exec -it 07-stream-redpanda-1 rpk topic delete green-trips
 docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/aggregation_green_job.py
 ```
-
 ```
 CREATE TABLE processed_green_events_aggregated (
     window_start TIMESTAMP,
@@ -182,6 +195,7 @@ Output:
 ```
 
 Question 5. Session window - longest streak
+
 Create another Flink job that uses a session window with a 5-minute gap on PULocationID, using lpep_pickup_datetime as the event time with a 5-second watermark tolerance.
 
 A session window groups events that arrive within 5 minutes of each other. When there's a gap of more than 5 minutes, the window closes.
@@ -196,6 +210,7 @@ How many trips were in the longest session?
 - 81
 
 Question 6. Tumbling window - largest tip
+
 Create a Flink job that uses a 1-hour tumbling window to compute the total tip_amount per hour (across all locations).
 
 Which hour had the highest total tip amount?
