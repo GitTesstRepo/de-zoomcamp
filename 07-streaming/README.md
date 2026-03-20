@@ -9,7 +9,6 @@ docker compose up -d
 
 Question 1. Redpanda version
 ```
-
 > docker compose ps
 
 > docker exec -it 07-stream-redpanda-1 rpk version
@@ -22,15 +21,12 @@ Go version:  go1.24.3
 
 Redpanda Cluster
   node-1  v25.3.9 - 836b4a36ef6d5121edbb1e68f0f673c2a8a244e2
-
-
-
-
 ```
 
 Run rpk version inside the Redpanda container:
-
+```
 docker exec -it workshop-redpanda-1 rpk version
+```
 What version of Redpanda are you running?
 
 Question 2. Sending data to Redpanda
@@ -46,18 +42,18 @@ Now write a producer to send the green taxi data to this topic.
 
 Read the parquet file and keep only these columns:
 
-lpep_pickup_datetime
-lpep_dropoff_datetime
-PULocationID
-DOLocationID
-passenger_count
-trip_distance
-tip_amount
-total_amount
+- lpep_pickup_datetime
+- lpep_dropoff_datetime
+- PULocationID
+- DOLocationID
+- passenger_count
+- trip_distance
+- tip_amount
+- total_amount
 Convert each row to a dictionary and send it to the green-trips topic. You'll need to handle the datetime columns - convert them to strings before serializing to JSON.
 
 Measure the time it takes to send the entire dataset and flush:
-
+```
 from time import time
 
 t0 = time()
@@ -68,18 +64,15 @@ producer.flush()
 
 t1 = time()
 print(f'took {(t1 - t0):.2f} seconds')
+```
 How long did it take to send the data?
 
-++ 10 seconds
-60 seconds
-120 seconds
-300 seconds
-
-
+- 10 seconds +++
+- 60 seconds
+- 120 seconds
+- 300 seconds
 
 took 13.15 seconds
-
-
 
 Question 3. Consumer - trip distance
 ```
@@ -95,53 +88,43 @@ CREATE TABLE processed_green_trips (
     tip_amount DOUBLE PRECISION,
     total_amount DOUBLE PRECISION
 );
-
 ```
-
--- 49416
-SELECT COUNT(*) FROM processed_green_trips;
-
--- 8506
-SELECT COUNT(*) FROM processed_green_trips WHERE trip_distance > 5;
-
-
-
 Write a Kafka consumer that reads all messages from the green-trips topic (set auto_offset_reset='earliest').
 
 Count how many trips have a trip_distance greater than 5.0 kilometers.
 
 How many trips have trip_distance > 5?
 
-6506
-7506
-8506
-9506
+- 6506
+- 7506
+- 8506 +++
+- 9506
+
+```
+-- 49416
+SELECT COUNT(*) FROM processed_green_trips;
+
+-- 8506
+SELECT COUNT(*) FROM processed_green_trips WHERE trip_distance > 5;
+```
+
 Part 2: PyFlink (Questions 4-6)
 For the PyFlink questions, you'll adapt the workshop code to work with the green taxi data. The key differences from the workshop:
 
-
 ```
-CREATE TABLE processed_green_events_aggregated (
-    window_start TIMESTAMP,
-    PULocationID INTEGER,
-    num_trips BIGINT,
-    PRIMARY KEY (window_start, PULocationID)
-);
-
-```
-
 docker exec -it 07-stream-redpanda-1 rpk topic delete green-trips
 docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/aggregation_green_job.py
-
+```
 
 Topic name: green-trips (instead of rides)
 Datetime columns use lpep_ prefix (instead of tpep_)
 You'll need to handle timestamps as strings (not epoch milliseconds)
 You can convert string timestamps to Flink timestamps in your source DDL:
-
+```
 lpep_pickup_datetime VARCHAR,
 event_timestamp AS TO_TIMESTAMP(lpep_pickup_datetime, 'yyyy-MM-dd HH:mm:ss'),
 WATERMARK FOR event_timestamp AS event_timestamp - INTERVAL '5' SECOND
+```
 Before running the Flink jobs, create the necessary PostgreSQL tables for your results.
 
 Important notes for the Flink jobs:
@@ -158,34 +141,34 @@ Create a Flink job that reads from green-trips and uses a 5-minute tumbling wind
 Write the results to a PostgreSQL table with columns: window_start, PULocationID, num_trips.
 
 After the job processes all data, query the results:
-
+```
 SELECT PULocationID, num_trips
 FROM <your_table>
 ORDER BY num_trips DESC
 LIMIT 3;
+```
 
+Which PULocationID had the most trips in a single 5-minute window?
+
+- 42
+- 74 +++
+- 75
+- 166
+
+```
+CREATE TABLE processed_green_events_aggregated (
+    window_start TIMESTAMP,
+    PULocationID INTEGER,
+    num_trips BIGINT,
+    PRIMARY KEY (window_start, PULocationID)
+);
+```
 ```
 SELECT PULocationID, num_trips
 FROM processed_green_events_aggregated
 ORDER BY num_trips DESC
 LIMIT 3;
-
-
-
 ````
-
-.
-
-
-Which PULocationID had the most trips in a single 5-minute window?
-
-42
-+ 74
-75
-166
-
-
-
 +--------------+-----------+
 | pulocationid | num_trips |
 |--------------+-----------|
@@ -205,48 +188,17 @@ Write the results to a PostgreSQL table and find the PULocationID with the longe
 
 How many trips were in the longest session?
 
-12
-31
-51
-81
+- 12
+- 31
+- 51
+- 81
+
 Question 6. Tumbling window - largest tip
 Create a Flink job that uses a 1-hour tumbling window to compute the total tip_amount per hour (across all locations).
 
 Which hour had the highest total tip amount?
 
-2025-10-01 18:00:00
-2025-10-16 18:00:00
-2025-10-22 08:00:00
-2025-10-30 16:00:00
-
-
-
-
-
-
-Install new Docker Compose
-bash
-sudo apt-get update
-sudo apt-get install docker-compose-plugin
-
-docker compose version
-
-
-
-Set a docker apt repository
-https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository
-
-
-
-
- docker compose exec jobmanager ./bin/flink run \
-> -py /opt/src/job/pass_through_job.py \
-> --pyFiles /opt/src -d
-
-
-Download file:
-PREFIX="https://raw.githubusercontent.com/DataTalksClub/data-engineering-zoomcamp/main/07-streaming/workshop"
-wget ${PREFIX}/src/producers/producer_realtime.py -P src/producers/
-
-
-
+- 2025-10-01 18:00:00
+- 2025-10-16 18:00:00
+- 2025-10-22 08:00:00
+- 2025-10-30 16:00:00
