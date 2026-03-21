@@ -30,7 +30,7 @@ def create_events_source_kafka(t_env):
 
 
 def create_events_aggregated_sink(t_env):
-    table_name = 'processed_green_events_aggregated'
+    table_name = 'hw4_processed_green_trips_aggregated'
     sink_ddl = f"""
         CREATE TABLE {table_name} (
             window_start TIMESTAMP(3),
