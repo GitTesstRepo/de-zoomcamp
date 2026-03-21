@@ -17,12 +17,15 @@ class Ride:
 
 
 def ride_from_row(row):
+    p_count = row['passenger_count']
+    p_count_float = None if p_count != p_count else float(p_count)
+
     return Ride(
         lpep_pickup_datetime=str(row['lpep_pickup_datetime']),
         lpep_dropoff_datetime=str(row['lpep_dropoff_datetime']),
         PULocationID=int(row['PULocationID']),
         DOLocationID=int(row['DOLocationID']),
-        passenger_count=float(row['passenger_count']),
+        passenger_count=p_count_float,
         trip_distance=float(row['trip_distance']),
         tip_amount=float(row['tip_amount']),
         total_amount=float(row['total_amount']),
