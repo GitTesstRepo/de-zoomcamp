@@ -167,10 +167,11 @@ Which PULocationID had the most trips in a single 5-minute window?
 
 ```
 docker exec -it 07-stream-redpanda-1 rpk topic delete green-trips
-docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/aggregation_green_job.py
+docker exec -it 07-stream-redpanda-1 rpk topic create green-trips
+docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/hw4_aggregation_green_job.py
 ```
 ```
-CREATE TABLE processed_green_events_aggregated (
+CREATE TABLE hw4_processed_green_trips_aggregated (
     window_start TIMESTAMP,
     PULocationID INTEGER,
     num_trips BIGINT,
@@ -179,10 +180,10 @@ CREATE TABLE processed_green_events_aggregated (
 ```
 ```
 SELECT PULocationID, num_trips
-FROM processed_green_events_aggregated
+FROM hw4_processed_green_trips_aggregated
 ORDER BY num_trips DESC
 LIMIT 3;
-````
+```
 Output:
 ```
 +--------------+-----------+
@@ -207,7 +208,36 @@ How many trips were in the longest session?
 - 12
 - 31
 - 51
-- 81
+- 81 +++
+
+```
+CREATE TABLE hw5_processed_green_trips_aggregated (
+    window_start TIMESTAMP,
+    PULocationID INTEGER,
+    num_trips BIGINT,
+    PRIMARY KEY (window_start, PULocationID)
+);
+```
+
+```
+docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/hw5_aggregation_green_job.py
+```
+
+```
+SELECT * 
+FROM hw5_processed_green_trips_aggregated 
+WHERE 
+    num_trips = (SELECT MAX(num_trips) FROM hw5_processed_green_trips_aggregated);
+```
+
+Output:
+```
++---------------------+--------------+-----------+
+| window_start        | pulocationid | num_trips |
+|---------------------+--------------+-----------|
+| 2025-10-08 06:46:14 | 74           | 81        |
++---------------------+--------------+-----------+
+```
 
 Question 6. Tumbling window - largest tip
 
@@ -216,6 +246,34 @@ Create a Flink job that uses a 1-hour tumbling window to compute the total tip_a
 Which hour had the highest total tip amount?
 
 - 2025-10-01 18:00:00
-- 2025-10-16 18:00:00
+- 2025-10-16 18:00:00 +++
 - 2025-10-22 08:00:00
 - 2025-10-30 16:00:00
+
+```
+CREATE TABLE hw6_processed_green_trips_aggregated (
+    window_start TIMESTAMP,
+    total_tip_amount DOUBLE PRECISION,
+    PRIMARY KEY (window_start)
+);
+```
+
+```
+docker exec -it 07-stream-jobmanager-1 flink run -py /opt/src/job/hw6_aggregation_green_job.py
+```
+
+```
+SELECT * 
+FROM hw6_processed_green_trips_aggregated 
+WHERE 
+    total_tip_amount = (SELECT MAX(total_tip_amount) FROM hw6_processed_green_trips_aggregated);
+```
+
+Output:
+```
++---------------------+-------------------+
+| window_start        | total_tip_amount  |
+|---------------------+-------------------|
+| 2025-10-16 18:00:00 | 524.9599999999998 |
++---------------------+-------------------+
+```
